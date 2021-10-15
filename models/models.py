@@ -6,7 +6,7 @@ from utils import torch_utils
 ONNX_EXPORT = False
 
 
-def create_modules(module_defs, img_size, cfg):
+def create_modules(module_defs, nc, img_size, cfg):
     # Constructs module list of layer blocks from module configuration in module_defs
 
     img_size = [img_size] * 2 if isinstance(img_size, int) else img_size  # expand if necessary
@@ -272,7 +272,7 @@ def create_modules(module_defs, img_size, cfg):
                 stride = [32, 16, 8]
             layers = mdef['from'] if 'from' in mdef else []
             modules = YOLOLayer(anchors=mdef['anchors'][mdef['mask']],  # anchor list
-                                nc=mdef['classes'],  # number of classes
+                                nc=nc,  # number of classes
                                 img_size=img_size,  # (416, 416)
                                 yolo_index=yolo_index,  # 0, 1, 2...
                                 layers=layers,  # output layers
@@ -524,11 +524,11 @@ class JDELayer(nn.Module):
 class Darknet(nn.Module):
     # YOLOv3 object detection model
 
-    def __init__(self, cfg, img_size=(416, 416), verbose=False):
+    def __init__(self, cfg, nc, img_size=(416, 416), verbose=False):
         super(Darknet, self).__init__()
 
         self.module_defs = parse_model_cfg(cfg)
-        self.module_list, self.routs = create_modules(self.module_defs, img_size, cfg)
+        self.module_list, self.routs = create_modules(self.module_defs, nc, img_size, cfg)
         self.yolo_layers = get_yolo_layers(self)
         # torch_utils.initialize_weights(self)
 
