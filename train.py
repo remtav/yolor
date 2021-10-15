@@ -178,10 +178,8 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
         model = DDP(model, device_ids=[opt.local_rank], output_device=opt.local_rank)
 
     # Trainloader
-    print('NO AUGMENTATION HARDCODED')
     dataloader, dataset = create_dataloader(train_path, imgsz, batch_size, gs, opt,
-                                            hyp=hyp, augment=False, cache=opt.cache_images, rect=opt.rect,
-                                            #hyp=hyp, augment=True, cache=opt.cache_images, rect=opt.rect,
+                                            hyp=hyp, augment=True, cache=opt.cache_images, rect=opt.rect,
                                             rank=rank, world_size=opt.world_size, workers=opt.workers)
     mlc = np.concatenate(dataset.labels, 0)[:, 0].max()  # max label class
     nb = len(dataloader)  # number of batches
@@ -211,7 +209,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
             #     check_anchors(dataset, model=model, thr=hyp['anchor_t'], imgsz=imgsz)
 
     # Model parameters
-    hyp['cls'] *= nc / 80.  # scale coco-tuned hyp['cls'] to current dataset
+    hyp['cls'] *= nc / 80  # scale coco-tuned hyp['cls'] to current dataset
     model.nc = nc  # attach number of classes to model
     model.hyp = hyp  # attach hyperparameters to model
     model.gr = 1.0  # iou loss ratio (obj_loss = 1.0 or iou)
@@ -313,7 +311,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
                 # Plot
                 if plots and ni < 3:
                     f = save_dir / f'train_batch{ni}.jpg'  # filename
-                    plot_images(images=imgs, targets=targets, paths=paths, fname=f, max_size=1300)
+                    plot_images(images=imgs, targets=targets, paths=paths, fname=f)
                     # if tb_writer:
                     #     tb_writer.add_image(f, result, dataformats='HWC', global_step=epoch)
                     #     tb_writer.add_graph(model, imgs)  # add model to tensorboard
@@ -334,9 +332,9 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
                 ema.update_attr(model)
             final_epoch = epoch + 1 == epochs
             if not opt.notest or final_epoch:  # Calculate mAP
-                if epoch >= 3:
+                if True: #epoch >= 3:
                     results, maps, times = test.test(opt.data,
-                                                 batch_size=batch_size*2,
+                                                 batch_size=batch_size, #*2,
                                                  imgsz=imgsz_test,
                                                  model=ema.ema.module if hasattr(ema.ema, 'module') else ema.ema,
                                                  single_cls=opt.single_cls,
