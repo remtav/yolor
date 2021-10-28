@@ -100,8 +100,10 @@ def detect(save_img=False):
             else:
                 p, s, im0 = path, '', im0s
 
-            save_path = str(Path(out) / Path(p).name)
-            txt_path = str(Path(out) / Path(p).stem) + ('_%g' % dataset.frame if dataset.mode == 'video' else '')
+            out_dist = Path(out) / [dir for dir in p.split('/') if 'District' in dir][0]
+            out_dist.mkdir(exist_ok=True)
+            save_path = str(Path(out_dist) / Path(p).name)
+            txt_path = str(Path(out_dist) / Path(p).stem) + ('_%g' % dataset.frame if dataset.mode == 'video' else '')
             s += '%gx%g ' % img.shape[2:]  # print string
             gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
             if det is not None and len(det):
