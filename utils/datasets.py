@@ -150,14 +150,19 @@ class LoadImages:  # for inference
         if '*' in p:
             files = sorted(glob.glob(p, recursive=True))  # glob
         elif os.path.isdir(p):
-            files = sorted(glob.glob(os.path.join(p, '*.*')))  # dir
+            files = sorted(Path(p).glob('**/*.*'))  # dir
         elif os.path.isfile(p):
             files = [p]  # files
         else:
             raise Exception('ERROR: %s does not exist' % p)
 
-        images = [x for x in files if x.split('.')[-1].lower() in img_formats]
-        videos = [x for x in files if x.split('.')[-1].lower() in vid_formats]
+        images = []
+        for x in files:
+            if x.is_file() and x.suffix == '.png' and "_bvo_annotated" in str(x.parent):
+                images.append(str(x))
+            else:
+                pass  # for debugging
+        videos = []  # [x for x in files if x.split('.')[-1].lower() in vid_formats]
         ni, nv = len(images), len(videos)
 
         self.img_size = img_size
