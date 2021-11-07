@@ -68,7 +68,8 @@ def detect(save_img=False):
 
     # Get names and colors
     names = load_classes(names)
-    colors = [[random.randint(0, 255) for _ in range(3)] for _ in range(len(names))]
+    #colors = [[random.randint(0, 255) for _ in range(3)] for _ in range(len(names))]
+    colors = [[0, 0, 255]]
 
     # Run inference
     t0 = time.time()
@@ -100,6 +101,7 @@ def detect(save_img=False):
             else:
                 p, s, im0 = path, '', im0s
 
+            print(p)
             out_dist = Path(out) / [dir for dir in p.split('/') if 'District' in dir][0]
             out_dist.mkdir(exist_ok=True)
             save_path = str(Path(out_dist) / Path(p).name)
@@ -123,7 +125,8 @@ def detect(save_img=False):
                             f.write(('%g ' * 6 + '\n') % (cls, *xywh, conf))  # label format with confidence
 
                     if save_img or view_img:  # Add bbox to image
-                        label = '%s %.2f' % (names[int(cls)], conf)
+                        #label = '%s %.2f' % (names[int(cls)], conf)
+                        label = '%.2f' % (conf)
                         plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
 
             # Print time (inference + NMS)
